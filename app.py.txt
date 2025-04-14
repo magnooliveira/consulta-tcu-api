@@ -1,0 +1,37 @@
+from flask import Flask, request, jsonify
+import requests
+
+app = Flask(__name__)
+
+TCU_API_URL = "https://dados-abertos.apps.tcu.gov.br/api/acordao/recupera-acordaos"
+
+@app.route('/')
+def home():
+    return "API Consulta TCU está ativa!"
+
+@app.route('/acordaos', methods=['GET'])
+def consultar_acordaos():
+    try:
+        inicio = request.args.get('inicio', default=0, type=int)
+        quantidade = request.args.get('quantidade', default=10, type=int)
+        params = {
+            'inicio': inicio,
+            'quantidade': quantidade
+        }
+        resposta = requests.get(TCU_API_URL, params=params)
+        dados = resposta.json()
+
+        return jsonify({
+            "status": "sucesso",
+            "quantidade_retorno": len(dados),
+            "acordaos": dados
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "erro",
+            "mensagem": str(e)
+        }), 500
+
+if __name__ == '__main__':
+    app.run()
