@@ -1,7 +1,1 @@
-services:
-  - type: web
-    name: consulta-tcu-api
-    env: python
-    plan: free
-    buildCommand: ""
-    startCommand: "python app.py"
+web: gunicorn app:app
