@@ -1,37 +1,31 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 import requests
 
 app = Flask(__name__)
 
-TCU_API_URL = "https://dados-abertos.apps.tcu.gov.br/api/acordao/recupera-acordaos"
-
-@app.route('/')
-def home():
-    return "API Consulta TCU está ativa!"
-
-@app.route('/acordaos', methods=['GET'])
-def consultar_acordaos():
+@app.route('/certidao/cnpj/<cnpj>', methods=['GET'])
+def consultar_certidao(cnpj):
     try:
-        inicio = request.args.get('inicio', default=0, type=int)
-        quantidade = request.args.get('quantidade', default=10, type=int)
-        params = {
-            'inicio': inicio,
-            'quantidade': quantidade
-        }
-        resposta = requests.get(TCU_API_URL, params=params)
-        dados = resposta.json()
+        url = f"https://certidoes-apf.apps.tcu.gov.br/api/certidao/cnpj/{cnpj}"
 
-        return jsonify({
-            "status": "sucesso",
-            "quantidade_retorno": len(dados),
-            "acordaos": dados
-        })
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json"
+        }
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            return jsonify(response.json())
+        elif response.status_code == 404:
+            return jsonify({"erro": "CNPJ não encontrado"}), 404
+        elif response.status_code == 401:
+            return jsonify({"erro": "Não autorizado. A API recusou a chamada."}), 401
+        else:
+            return jsonify({"erro": f"Erro inesperado: {response.status_code}"}), response.status_code
 
     except Exception as e:
-        return jsonify({
-            "status": "erro",
-            "mensagem": str(e)
-        }), 500
+        return jsonify({"erro": f"Erro interno: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
