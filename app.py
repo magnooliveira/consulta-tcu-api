@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 import requests
+import os
 
 app = Flask(__name__)
 
@@ -9,8 +10,12 @@ def consultar_certidao(cnpj):
         url = f"https://certidoes-apf.apps.tcu.gov.br/api/certidao/cnpj/{cnpj}"
 
         headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "application/json"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:112.0) Gecko/20100101 Firefox/112.0",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Referer": "https://certidoes-apf.apps.tcu.gov.br/",
+            "Origin": "https://certidoes-apf.apps.tcu.gov.br",
+            "Connection": "keep-alive"
         }
 
         response = requests.get(url, headers=headers)
@@ -28,7 +33,5 @@ def consultar_certidao(cnpj):
         return jsonify({"erro": f"Erro interno: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    import os
-
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
