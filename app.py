@@ -4,6 +4,12 @@ import os
 
 app = Flask(__name__)
 
+# Rota principal ("/") — evita erro 404
+@app.route('/')
+def home():
+    return "API de Consulta de Certidões do TCU Online 🚀"
+
+# Rota para consultar CNPJ
 @app.route('/certidao/cnpj/<cnpj>', methods=['GET'])
 def consultar_certidao(cnpj):
     try:
@@ -32,6 +38,7 @@ def consultar_certidao(cnpj):
     except Exception as e:
         return jsonify({"erro": f"Erro interno: {str(e)}"}), 500
 
+# Porta dinâmica (obrigatória para o Render)
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
